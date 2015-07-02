@@ -17,7 +17,7 @@ function love.load()
     -- load images
     resources:addImage("author", "author.png")
     -- load fonts
-    resources:addFont("tiny", "DejaVuSans.ttf", 10)
+    resources:addFont("font", "DejaVuSans.ttf", 20)
     -- load music
     -- resources:addMusic("background", "background.mp3")
     resources:load()
@@ -30,9 +30,11 @@ function love.update(dt)
 end
 
 function love.draw(dt)
+    love.graphics.setShader(myShader)
     stack:draw(dt)
+    love.graphics.setShader()
 
-    love.graphics.setFont(resources.fonts.tiny)
+    love.graphics.setFont(resources.fonts.font)
     love.graphics.print("FPS: " .. love.timer.getFPS(), 5, 5)
 end
 
