@@ -1,5 +1,3 @@
--- main menu
-
 require("util/gamestate")
 require("util/resources")
 

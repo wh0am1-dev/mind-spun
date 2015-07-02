@@ -1,5 +1,3 @@
--- intro
-
 require("menu")
 require("util/gamestate")
 require("util/resources")
