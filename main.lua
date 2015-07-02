@@ -3,6 +3,7 @@ require("util/resources")
 require("util/gamestack")
 
 resources = Resources("assets/")
+scale = 1
 
 function reset()
     -- start game

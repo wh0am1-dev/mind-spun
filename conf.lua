@@ -5,8 +5,8 @@ function love.conf(t)
 
     t.window.title = "Mind-Spun"
     t.window.icon = nil
-    t.window.width = 1366
-    t.window.height = 768
+    t.window.width = 320
+    t.window.height = 240
     t.window.borderless = false
     t.window.resizable = false
     t.window.minwidth = 1

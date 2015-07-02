@@ -7,7 +7,7 @@ require("util/resources")
 Intro = class("Intro", GameState)
 
 timer = 0
-time = 100
+time = 3
 
 function Intro:update(dt)
     timer = timer + dt
@@ -23,9 +23,9 @@ function Intro:draw(dt)
 end
 
 function Intro:keypressed(k)
-    if k == "escape" or k == "enter" or k == "space" then
+    if k == "escape" then
         love.event.push("quit")
-    else
+    elseif k == "enter" or k == "space" then
         goToMenu()
     end
 end
