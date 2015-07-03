@@ -30,6 +30,7 @@ levels = { }
 
 function love.load()
     love.window.setMode(window.originalWidth * window.scale, window.originalHeight * window.scale)
+    love.graphics.setDefaultFilter("nearest", "nearest", 0)
 
     math.randomseed(os.time())
 
@@ -48,7 +49,7 @@ function love.update(dt) end
 -- -------------------------------------------------------------
 
 function love.draw(dt)
-    love.graphics.draw(res.img.menu, 0, 0)
+    love.graphics.draw(res.img.menu, 0, 0, 0, window.scale, window.scale)
 
     if debug then
         love.graphics.print("FPS: " .. love.timer.getFPS(), 5, 5)
