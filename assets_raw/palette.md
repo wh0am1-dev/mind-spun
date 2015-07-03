@@ -1,25 +1,25 @@
 # Mind-Spun color palette
 
+## Black
+- Dark: `#444444`
+- Light: `#585858`
+
 ## Red
-- c97677
-- d07f80
-
-## Blue
-- 88d7d6
-- 92dddc
-
------
-
-## Green
-- add484
-- b5da8d
+- Dark: `#c97677`
+- Light: `#de877e`
 
 ## Purple
-- 9b73c6
-- a37bcd
+- Dark: `#9b73c6`
+- Light: `#ad82cf`
 
------
+## Blue
+- Dark: `#88d7d6`
+- Light: `#9bebdf`
+
+## Green
+- Dark: `#add484`
+- Light: `#bfe68a`
 
 ## Yellow
-- f6c878
-- f9ce85
+- Dark: `#f6c878`
+- Light: `#ffd482`

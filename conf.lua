@@ -7,12 +7,12 @@ function love.conf(t)
     t.window.icon = nil
     t.window.width = 320
     t.window.height = 240
-    t.window.borderless = false
+    t.window.borderless = true
     t.window.resizable = false
     t.window.minwidth = 1
     t.window.minheight = 1
     t.window.fullscreen = false
-    t.window.fullscreentype = "desktop"
+    t.window.fullscreentype = "normal"
     t.window.vsync = true
     t.window.fsaa = 4
     t.window.display = 1
