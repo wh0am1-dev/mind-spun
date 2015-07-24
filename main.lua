@@ -30,11 +30,36 @@ button = {
         wasDown = false,
         isDown = false,
         justPressed = false
+    },
+    back = {
+        name = "back",
+        x = 15,
+        y = 18,
+        width = 0,
+        height = 0,
+        up = nil,
+        down = nil,
+        wasDown = false,
+        isDown = false,
+        justPressed = false
+    },
+    again = {
+        name = "again",
+        x = 10,
+        y = 203,
+        width = 0,
+        height = 0,
+        up = nil,
+        down = nil,
+        wasDown = false,
+        isDown = false,
+        justPressed = false
     }
 }
 
 -- global variables
 global = {
+    borderless = false,
     width = 320,
     height = 240,
     scaleBefore = 3,
@@ -46,15 +71,20 @@ settings = {
     debug = false,
     scale = 3,
     fullscreen = false,
-    sound = false
+    sound = true,
+    level = 0
 }
 
 timers = {
     time = 0.5,
     toGame = false,
     toMenu = false,
+    reset = false,
+    exit = false,
     toGameTime = 0,
-    toMenuTime = 0
+    toMenuTime = 0,
+    resetTime = 0,
+    exitTime = 0
 }
 
 levels = { }
@@ -64,8 +94,6 @@ levels = { }
 
 function love.load()
     -- load settings
-    print("exists settings.lua? >>> " .. tostring(love.filesystem.exists("settings.lua")))
-    print("settings:\n" .. table.show(settings, "settings"))
     if not love.filesystem.exists("settings.lua") then love.filesystem.write("settings.lua", table.show(settings, "settings")) end
     settingsChunk = love.filesystem.load("settings.lua")
     settingsChunk()
@@ -76,7 +104,7 @@ function love.load()
         global.scaleBefore = settings.scale
         settings.scale = 5
     end
-    love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = true })
+    love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = global.borderless })
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
     -- math.randomseed(os.time())
 
@@ -84,8 +112,19 @@ function love.load()
     loadImg("menu", "menu.png")
     loadImg("playUp", "btn_play_up.png")
     loadImg("playDown", "btn_play_down.png")
+    loadImg("backUp", "btn_back_up.png")
+    loadImg("backDown", "btn_back_down.png")
+    loadImg("againUp", "btn_again_up.png")
+    loadImg("againDown", "btn_again_down.png")
     loadImg("board", "board.png")
+
     loadBgm("music", "music.mp3")
+    loadSfx("meta", "metamorph.ogg")
+    loadSfx("phase", "phase.ogg")
+    loadSfx("select_0", "select_0.ogg")
+    loadSfx("select_1", "select_1.ogg")
+    loadSfx("select_2", "select_2.ogg")
+    loadSfx("select_3", "select_3.ogg")
     -- loadFont("font", "DejaVuSans.ttf", 20)
     loadRes()
 
@@ -96,6 +135,14 @@ function love.load()
     button.play.height = button.play.up:getHeight()
     button.play.x = global.width / 2 - (button.play.up:getWidth() / 2)
     button.play.y = global.height * 3 / 4 - (button.play.down:getHeight() / 2)
+    button.back.up = res.img.backUp
+    button.back.down = res.img.backDown
+    button.back.width = button.back.up:getWidth()
+    button.back.height = button.back.up:getHeight()
+    button.again.up = res.img.againUp
+    button.again.down = res.img.againDown
+    button.again.width = button.again.up:getWidth()
+    button.again.height = button.again.up:getHeight()
 
     if settings.sound then res.bgm.music:play() end
 end
@@ -104,18 +151,65 @@ end
 
 function love.update(dt)
     if global.inGame then
-        -- game
+        updateGame(dt)
     else
-        if button.play.wasDown and not button.play.isDown then
-            button.play.isDown = false
-            button.play.wasDown = false
-            button.play.justPressed = false
-            timers.toGame = true
-        end
-        button.play.wasDown = button.play.isDown
+        updateMenu(dt)
     end
 
-    if timers.toGame then
+    updateTimers(dt)
+end
+
+-- -------------------------------------------------------------
+
+function updateGame(dt)
+    button.back.justPressed = false
+    if button.back.wasDown and not button.back.isDown then
+        button.back.isDown = false
+        button.back.wasDown = false
+        button.back.justPressed = true
+        timers.toMenu = true
+    end
+    button.back.wasDown = button.back.isDown
+
+    button.again.justPressed = false
+    if button.again.wasDown and not button.again.isDown then
+        button.again.isDown = false
+        button.again.wasDown = false
+        button.again.justPressed = true
+        timers.reset = true
+    end
+    button.again.wasDown = button.again.isDown
+
+    if button.back.justPressed then res.sfx.select_1:play() end
+    if button.again.justPressed then res.sfx.select_3:play() end
+end
+
+-- -------------------------------------------------------------
+
+function updateMenu(dt)
+    button.play.justPressed = false
+    if button.play.wasDown and not button.play.isDown then
+        button.play.isDown = false
+        button.play.wasDown = false
+        button.play.justPressed = true
+        timers.toGame = true
+    end
+    button.play.wasDown = button.play.isDown
+
+    if button.play.justPressed then res.sfx.select_2:play() end
+end
+
+-- -------------------------------------------------------------
+
+function updateTimers(dt)
+    if timers.exit then
+        timers.exitTime = timers.exitTime + dt
+        if timers.exitTime > timers.time then
+            timers.exitTime = 0
+            timers.exit = false
+            love.event.push("quit")
+        end
+    elseif timers.toGame then
         timers.toGameTime = timers.toGameTime + dt
         if timers.toGameTime > timers.time then
             timers.toGameTime = 0
@@ -129,6 +223,12 @@ function love.update(dt)
             timers.toMenu = false
             global.inGame = false
         end
+    elseif timers.reset then
+        timers.resetTime = timers.resetTime + dt
+        if timers.resetTime > timers.time then
+            timers.resetTime = 0
+            timers.reset = false
+        end
     end
 end
 
@@ -137,6 +237,18 @@ end
 function love.draw(dt)
     if global.inGame then
         love.graphics.draw(res.img.board, 0, 0, 0, settings.scale, settings.scale)
+
+        if button.back.isDown then
+            love.graphics.draw(button.back.down, button.back.x * settings.scale, button.back.y * settings.scale, 0, settings.scale, settings.scale)
+        else
+            love.graphics.draw(button.back.up, button.back.x * settings.scale, button.back.y * settings.scale, 0, settings.scale, settings.scale)
+        end
+
+        if button.again.isDown then
+            love.graphics.draw(button.again.down, button.again.x * settings.scale, button.again.y * settings.scale, 0, settings.scale, settings.scale)
+        else
+            love.graphics.draw(button.again.up, button.again.x * settings.scale, button.again.y * settings.scale, 0, settings.scale, settings.scale)
+        end
     else
         love.graphics.draw(res.img.menu, 0, 0, 0, settings.scale, settings.scale)
 
@@ -166,7 +278,7 @@ function love.keypressed(k)
         if k == "+" then
             if not settings.fullscreen and settings.scale < 5 then
                 settings.scale = settings.scale + 1
-                love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = true })
+                love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = global.borderless })
             end
             return
         end
@@ -175,7 +287,7 @@ function love.keypressed(k)
         if k == "-" then
             if not settings.fullscreen and settings.scale > 1 then
                 settings.scale = settings.scale - 1
-                love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = true })
+                love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = global.borderless })
             end
             return
         end
@@ -189,7 +301,7 @@ function love.keypressed(k)
             else
                 settings.scale = global.scaleBefore
             end
-            love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = true })
+            love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = global.borderless })
         end
     end
 end
@@ -202,8 +314,10 @@ function love.keyreleased(k)
         if k == "escape" then
             if global.inGame then
                 timers.toMenu = true
+                res.sfx.select_1:play()
             else
-                love.event.push("quit")
+                res.sfx.select_0:play()
+                timers.exit = true
             end
             return
         end
@@ -214,7 +328,15 @@ end
 
 function love.mousepressed(x, y, b)
     if global.inGame then
-        -- game
+        if b == "l" then
+            if not timers.toMenu and boxHit(x, y, button.back.x * settings.scale, button.back.y * settings.scale, button.back.width * settings.scale, button.back.height * settings.scale) then
+                button.back.isDown = true
+            end
+
+            if not timers.reset and boxHit(x, y, button.again.x * settings.scale, button.again.y * settings.scale, button.again.width * settings.scale, button.again.height * settings.scale) then
+                button.again.isDown = true
+            end
+        end
     else
         if b == "l" then
             if not timers.toGame and boxHit(x, y, button.play.x * settings.scale, button.play.y * settings.scale, button.play.width * settings.scale, button.play.height * settings.scale) then
@@ -228,7 +350,10 @@ end
 
 function love.mousereleased(x, y, b)
     if global.inGame then
-        -- game
+        if b == "l" then
+            if not timers.toMenu and button.back.isDown then button.back.isDown = false end
+            if not timers.reset and button.again.isDown then button.again.isDown = false end
+        end
     else
         if b == "l" then
             if not timers.toGame and button.play.isDown then button.play.isDown = false end
@@ -283,24 +408,24 @@ end
 
 function loadRes(threaded)
     for name, pair in pairs(res.fntQueue) do
-        res.fnt[name] = love.graphics.newFont(res.dir .. pair[1], pair[2])
+        res.fnt[name] = love.graphics.newFont(res.dir .. "fonts/" .. pair[1], pair[2])
         res.fntQueue[name] = nil
     end
 
     for name, src in pairs(res.imgQueue) do
-        res.img[name] = love.graphics.newImage(res.dir .. src)
+        res.img[name] = love.graphics.newImage(res.dir .. "img/" .. src)
         res.imgQueue[name] = nil
     end
 
     for name, src in pairs(res.bgmQueue) do
-        res.bgm[name] = love.audio.newSource(res.dir .. src)
+        res.bgm[name] = love.audio.newSource(res.dir .. "bgm/" .. src)
         res.bgm[name]:setLooping(true)
         res.bgmQueue[name] = nil
     end
 
     for name, src in pairs(res.sfxQueue) do
-        res.sfx[name] = love.audio.newSource(res.dir .. src)
-        res.bgm[name]:setLooping(false)
+        res.sfx[name] = love.audio.newSource(res.dir .. "sfx/" .. src)
+        res.sfx[name]:setLooping(false)
         res.sfxQueue[name] = nil
     end
 end
