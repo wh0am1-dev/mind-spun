@@ -1,5 +1,6 @@
 require("lib/lovedebug")
 flux = require("lib/flux")
+require("levels")
 
 -- =========================================================================================
 -- Variables
@@ -87,8 +88,6 @@ timers = {
     exitTime = 0
 }
 
-levels = { }
-
 -- =========================================================================================
 -- Love2D main functions
 
@@ -144,7 +143,8 @@ function love.load()
     button.again.width = button.again.up:getWidth()
     button.again.height = button.again.up:getHeight()
 
-    if settings.sound then res.bgm.music:play() end
+    -- TODO uncomment
+    -- if settings.sound then res.bgm.music:play() end
 end
 
 -- -------------------------------------------------------------
@@ -508,4 +508,19 @@ function table.show(t, name, indent)
     cart, autoref = "", ""
     addtocart(t, name, indent)
     return cart .. autoref
+end
+
+-- =========================================================================================
+-- Debug level formatting
+
+function printLevel(num)
+    print("Level 1:")
+    for i = 1, 6 do
+        print("Pod " .. i - 1 .. ":")
+        print("Links:")
+        for j = 1, 6 do
+            print("pos(" .. i .. ", " .. j .. ") = " .. levels[num].links[i][j])
+        end
+        print("Pos: " .. levels[num].pos[i])
+    end
 end
