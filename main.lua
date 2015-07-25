@@ -64,6 +64,7 @@ global = {
     width = 320,
     height = 240,
     scaleBefore = 3,
+    volume = 1,
     inGame = false
 }
 
@@ -76,15 +77,21 @@ settings = {
     level = 0
 }
 
+transition = {
+    red = 88,
+    green = 88,
+    blue = 88,
+    alpha = 0
+}
+
 timers = {
-    time = 0.5,
+    time = 1.0,
+    inTransition = false,
     toGame = false,
     toMenu = false,
-    reset = false,
     exit = false,
     toGameTime = 0,
     toMenuTime = 0,
-    resetTime = 0,
     exitTime = 0
 }
 
@@ -143,17 +150,20 @@ function love.load()
     button.again.width = button.again.up:getWidth()
     button.again.height = button.again.up:getHeight()
 
-    -- TODO uncomment
-    -- if settings.sound then res.bgm.music:play() end
+    if settings.sound then res.bgm.music:play() end
 end
 
 -- -------------------------------------------------------------
 
 function love.update(dt)
-    if global.inGame then
-        updateGame(dt)
-    else
-        updateMenu(dt)
+    flux.update(dt)
+
+    if not timers.inTransition then
+        if global.inGame then
+            updateGame(dt)
+        else
+            updateMenu(dt)
+        end
     end
 
     updateTimers(dt)
@@ -167,7 +177,9 @@ function updateGame(dt)
         button.back.isDown = false
         button.back.wasDown = false
         button.back.justPressed = true
+        timers.inTransition = true
         timers.toMenu = true
+        startTransition()
     end
     button.back.wasDown = button.back.isDown
 
@@ -176,7 +188,6 @@ function updateGame(dt)
         button.again.isDown = false
         button.again.wasDown = false
         button.again.justPressed = true
-        timers.reset = true
     end
     button.again.wasDown = button.again.isDown
 
@@ -192,7 +203,9 @@ function updateMenu(dt)
         button.play.isDown = false
         button.play.wasDown = false
         button.play.justPressed = true
+        timers.inTransition = true
         timers.toGame = true
+        startTransition()
     end
     button.play.wasDown = button.play.isDown
 
@@ -203,31 +216,37 @@ end
 
 function updateTimers(dt)
     if timers.exit then
+        res.bgm.music:setVolume(global.volume)
         timers.exitTime = timers.exitTime + dt
         if timers.exitTime > timers.time then
             timers.exitTime = 0
             timers.exit = false
+            timers.inTransition = false
             love.event.push("quit")
         end
     elseif timers.toGame then
         timers.toGameTime = timers.toGameTime + dt
+
+        if timers.toGameTime > timers.time / 2 then
+            global.inGame = true
+        end
+
         if timers.toGameTime > timers.time then
             timers.toGameTime = 0
             timers.toGame = false
-            global.inGame = true
+            timers.inTransition = false
         end
     elseif timers.toMenu then
         timers.toMenuTime = timers.toMenuTime + dt
+
+        if timers.toMenuTime > timers.time / 2 then
+            global.inGame = false
+        end
+
         if timers.toMenuTime > timers.time then
             timers.toMenuTime = 0
             timers.toMenu = false
-            global.inGame = false
-        end
-    elseif timers.reset then
-        timers.resetTime = timers.resetTime + dt
-        if timers.resetTime > timers.time then
-            timers.resetTime = 0
-            timers.reset = false
+            timers.inTransition = false
         end
     end
 end
@@ -259,6 +278,10 @@ function love.draw(dt)
         end
     end
 
+    if timers.inTransition then
+        drawTransition()
+    end
+
     if settings.debug then
         love.graphics.setColor(0, 0, 0, 255)
         love.graphics.print("FPS: " .. love.timer.getFPS(), 5, 5)
@@ -268,6 +291,22 @@ function love.draw(dt)
         end
         love.graphics.setColor(255, 255, 255, 255)
     end
+end
+
+-- -------------------------------------------------------------
+
+function startTransition()
+    flux.to(transition, 0.5, { alpha = 255 }):after(transition, 0.5, { alpha = 0 })
+end
+
+function exitTransition()
+    flux.to(transition, 1, { red = 0, green = 0, blue = 0, alpha = 255 })
+end
+
+function drawTransition()
+    love.graphics.setColor(transition.red, transition.green, transition.blue, transition.alpha)
+    love.graphics.rectangle("fill", 0, 0, global.width * settings.scale, global.height * settings.scale)
+    love.graphics.setColor(255, 255, 255, 255)
 end
 
 -- -------------------------------------------------------------
@@ -313,11 +352,16 @@ function love.keyreleased(k)
         -- quit the game
         if k == "escape" then
             if global.inGame then
+                timers.inTransition = true
                 timers.toMenu = true
+                startTransition()
                 res.sfx.select_1:play()
             else
                 res.sfx.select_0:play()
+                timers.inTransition = true
                 timers.exit = true
+                flux.to(global, 1, { volume = 0 })
+                exitTransition()
             end
             return
         end
@@ -333,7 +377,7 @@ function love.mousepressed(x, y, b)
                 button.back.isDown = true
             end
 
-            if not timers.reset and boxHit(x, y, button.again.x * settings.scale, button.again.y * settings.scale, button.again.width * settings.scale, button.again.height * settings.scale) then
+            if boxHit(x, y, button.again.x * settings.scale, button.again.y * settings.scale, button.again.width * settings.scale, button.again.height * settings.scale) then
                 button.again.isDown = true
             end
         end
