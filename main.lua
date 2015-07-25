@@ -63,6 +63,9 @@ global = {
     borderless = false,
     width = 320,
     height = 240,
+    screenWidth = 0,
+    screenHeight = 0,
+    fullscreenScale = 1,
     scaleBefore = 3,
     volume = 1,
     inGame = false
@@ -105,10 +108,16 @@ function love.load()
     settingsChunk()
 
     -- setup window
+    love.window.setMode(0, 0, { fullscreen = false })
+    global.screenWidth = love.graphics.getWidth()
+    global.screenHeight = love.graphics.getHeight()
+    while global.fullscreenScale < 5 and global.width * (global.fullscreenScale + 1) < global.screenWidth and global.height * (global.fullscreenScale + 1) < global.screenHeight do
+        global.fullscreenScale = global.fullscreenScale + 1
+    end
     love.graphics.setBackgroundColor(88, 88, 88)
     if settings.fullscreen then
         global.scaleBefore = settings.scale
-        settings.scale = 5
+        settings.scale = global.fullscreenScale
     end
     love.window.setMode(global.width * settings.scale, global.height * settings.scale, { fullscreen = settings.fullscreen, borderless = global.borderless })
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
@@ -336,7 +345,7 @@ function love.keypressed(k)
             settings.fullscreen = not settings.fullscreen
             if settings.fullscreen then
                 global.scaleBefore = settings.scale
-                settings.scale = 5
+                settings.scale = global.fullscreenScale
             else
                 settings.scale = global.scaleBefore
             end
