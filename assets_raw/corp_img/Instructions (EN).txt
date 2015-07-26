@@ -1,0 +1,24 @@
+Ladies and gentlemen, let me introduce to you a brand new board game: The one and only Mind-Spun !!! Hours of mind-challenging puzzles await.
+
+Mind-Spun is a puzzle game where you move neurons through a neural network trying to match their colors. Seems simple? Give it a try and you will see it is not! Bring your cup of coffee (or tea) and prepare to entangle your mind.
+
+--------------------
+
+Rules:
+Take all the neurons to the cell with the same color.
+Neurons can only be moved along the links.
+The neurons that can be moved will be surrounded with a white circle, just click on one of them to move it to the empty cell.
+Have fun!
+
+--------------------
+
+Controls:
+Use the mouse to control almost all the game.
+Press "+" to scale up the window.
+Press "-" to scale down the window.
+Press "Alt + Enter" to toggle fullscreen mode (may be buggy at the moment).
+
+--------------------
+
+Thank you for playing Mind-Spun,
+Carlos Aguilar (Neko250).

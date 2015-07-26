@@ -11,13 +11,13 @@ Puzzle game made with Love2D
 
 ## Beta Testers
 
-1. Manolo Reyes
-2. Nelson Casares
-3. David Bravo de Arce
-4. Jorge García Manzanares
-5. Rosa Ruiz Cabañes
-6.
-7.
-8.
-9.
-10.
+1. Juan Carlos Aguilar
+2. Adrián Amorós
+3. David Bravo
+4. Nelson Casares
+5. Jose María García
+6. Esther de la Morena
+7. Jorge García
+8. Manolo Reyes
+9. Rosa Ruiz
+10. Pablo Sabín

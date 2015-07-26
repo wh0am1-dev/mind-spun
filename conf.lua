@@ -1,10 +1,10 @@
 function love.conf(t)
-    t.identity = "mindspun"
+    t.identity = "entangled"
     t.version = "0.9.2"
     t.console = false
 
     t.window.title = "Mind-Spun"
-    t.window.icon = nil
+    t.window.icon = "assets/img/icon.png"
     t.window.width = 320
     t.window.height = 240
     t.window.borderless = false

@@ -1,0 +1,24 @@
+Damas y caballeros, permítanme presentarles el magnífico nuevo juego de mesa: ¡¡¡El mismísimo y único Mind-Spun!!! Horas de intrincados puzles te esperan.
+
+Mind-Spun es un puzle en el que mueves neuronas a través de una red neuronal intentando hacer coincidir los colores. ¿Parece simple? ¡Inténtalo y verás que no lo es! Prepárate una taza de café (o té) y prepárate para enredar tu mente.
+
+--------------------
+
+Reglas:
+Lleva todas las neuronas a las células del mismo color.
+Las neuronas solo se pueden mover por los enlaces.
+Las neuronas que se puedan mover estarán rodeadas de un círculo blanco, tan solo haz click en una de ellas para moverla a la célula vacía.
+¡Diviértete!
+
+--------------------
+
+Controles:
+Usa el ratón para controlar casi todo el juego.
+Pulsa "+" para aumentar de tamaño la ventana.
+Pulsa "-" para disminuir de tamaño la ventana.
+Pulsa "Alt + Enter" para alternar el modo pantalla completa (puede haber fallos).
+
+--------------------
+
+Gracias por jugar a Mind-Spun,
+Carlos Aguilar (Neko250).

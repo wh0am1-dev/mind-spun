@@ -30,6 +30,30 @@ button = {
         isDown = false,
         justPressed = false
     },
+    info = {
+        name = "info",
+        x = 9,
+        y = 221,
+        width = 0,
+        height = 0,
+        up = nil,
+        down = nil,
+        wasDown = false,
+        isDown = false,
+        justPressed = false
+    },
+    exit = {
+        name = "exit",
+        x = 283,
+        y = 221,
+        width = 0,
+        height = 0,
+        up = nil,
+        down = nil,
+        wasDown = false,
+        isDown = false,
+        justPressed = false
+    },
     back = {
         name = "back",
         x = 15,
@@ -126,14 +150,15 @@ global = {
     screenWidth = 0,
     screenHeight = 0,
     fullscreenScale = 1,
-    scaleBefore = 3,
+    scaleBefore = 2,
     volume = 1,
     inGame = false,
+    inCredits = false,
     easing = "backout"
 }
 
 settings = {
-    scale = 3,
+    scale = 2,
     fullscreen = false,
     sound = true,
     level = 1
@@ -152,10 +177,12 @@ timers = {
     resetting = false,
     toGame = false,
     toMenu = false,
+    toCredits = false,
     exit = false,
     resetTime = 0,
     toGameTime = 0,
     toMenuTime = 0,
+    toCreditsTime = 0,
     exitTime = 0
 }
 
@@ -164,8 +191,8 @@ timers = {
 
 function love.load()
     -- load settings
-    if not love.filesystem.exists("settings.lua") then love.filesystem.write("settings.lua", table.show(settings, "settings")) end
-    settingsChunk = love.filesystem.load("settings.lua")
+    if not love.filesystem.exists("data.bin") then love.filesystem.write("data.bin", table.show(settings, "settings")) end
+    settingsChunk = love.filesystem.load("data.bin")
     settingsChunk()
 
     -- setup window
@@ -186,8 +213,13 @@ function love.load()
 
     -- load resources
     loadImg("menu", "menu.png")
+    loadImg("credits", "credits.png")
     loadImg("playUp", "btn_play_up.png")
     loadImg("playDown", "btn_play_down.png")
+    loadImg("infoUp", "btn_info_up.png")
+    loadImg("infoDown", "btn_info_down.png")
+    loadImg("exitUp", "btn_exit_up.png")
+    loadImg("exitDown", "btn_exit_down.png")
     loadImg("backUp", "btn_back_up.png")
     loadImg("backDown", "btn_back_down.png")
     loadImg("againUp", "btn_again_up.png")
@@ -226,6 +258,7 @@ function love.load()
 
     loadBgm("music", "music.mp3")
     loadSfx("yaay", "yaay.ogg")
+    loadSfx("woosh", "woosh.ogg")
     loadSfx("select_0", "select_0.ogg")
     loadSfx("select_1", "select_1.ogg")
     loadSfx("select_2", "select_2.ogg")
@@ -241,6 +274,14 @@ function love.load()
     button.play.height = button.play.up:getHeight()
     button.play.x = global.width / 2 - (button.play.up:getWidth() / 2)
     button.play.y = global.height * 3 / 4 - (button.play.down:getHeight() / 2) - 10
+    button.info.up = res.img.infoUp
+    button.info.down = res.img.infoDown
+    button.info.width = button.info.up:getWidth()
+    button.info.height = button.info.up:getHeight()
+    button.exit.up = res.img.exitUp
+    button.exit.down = res.img.exitDown
+    button.exit.width = button.exit.up:getWidth()
+    button.exit.height = button.exit.up:getHeight()
     button.back.up = res.img.backUp
     button.back.down = res.img.backDown
     button.back.width = button.back.up:getWidth()
@@ -271,6 +312,8 @@ function love.update(dt)
             if not timers.resetting then
                 updateGame(dt)
             end
+        elseif global.inCredits then
+            updateCredits(dt)
         else
             updateMenu(dt)
         end
@@ -322,7 +365,48 @@ function updateMenu(dt)
     end
     button.play.wasDown = button.play.isDown
 
+    button.info.justPressed = false
+    if button.info.wasDown and not button.info.isDown then
+        button.info.isDown = false
+        button.info.wasDown = false
+        button.info.justPressed = true
+        timers.inTransition = true
+        timers.toCredits = true
+        startTransition()
+    end
+    button.info.wasDown = button.info.isDown
+
+    button.exit.justPressed = false
+    if button.exit.wasDown and not button.exit.isDown then
+        button.exit.isDown = false
+        button.exit.wasDown = false
+        button.exit.justPressed = true
+        timers.inTransition = true
+        timers.exit = true
+        exitTransition()
+    end
+    button.exit.wasDown = button.exit.isDown
+
     if button.play.justPressed then res.sfx.select_2:play() end
+    if button.info.justPressed then res.sfx.select_2:play() end
+    if button.exit.justPressed then res.sfx.select_0:play() end
+end
+
+-- -------------------------------------------------------------
+
+function updateCredits(dt)
+    button.back.justPressed = false
+    if button.back.wasDown and not button.back.isDown then
+        button.back.isDown = false
+        button.back.wasDown = false
+        button.back.justPressed = true
+        timers.inTransition = true
+        timers.toMenu = true
+        startTransition()
+    end
+    button.back.wasDown = button.back.isDown
+
+    if button.back.justPressed then res.sfx.select_1:play() end
 end
 
 -- -------------------------------------------------------------
@@ -357,11 +441,24 @@ function updateTimers(dt)
 
         if timers.toMenuTime > timers.time / 2 then
             global.inGame = false
+            global.inCredits = false
         end
 
         if timers.toMenuTime > timers.time then
             timers.toMenuTime = 0
             timers.toMenu = false
+            timers.inTransition = false
+        end
+    elseif timers.toCredits then
+        timers.toCreditsTime = timers.toCreditsTime + dt
+
+        if timers.toCreditsTime > timers.time / 2 then
+            global.inCredits = true
+        end
+
+        if timers.toCreditsTime > timers.time then
+            timers.toCreditsTime = 0
+            timers.toCredits = false
             timers.inTransition = false
         end
     elseif timers.resetting then
@@ -378,6 +475,8 @@ end
 function love.draw(dt)
     if global.inGame then
         drawGame(dt)
+    elseif global.inCredits then
+        drawCredits(dt)
     else
         drawMenu(dt)
     end
@@ -390,18 +489,7 @@ function love.draw(dt)
         love.graphics.setColor(0, 0, 0, 255)
         love.graphics.print("--- Debug ---", 5, 5)
         love.graphics.print("FPS: " .. love.timer.getFPS(), 5, 20)
-
-        if not global.inGame then
-            love.graphics.print("isPlayDown: " .. tostring(button.play.isDown), 5, 35)
-            love.graphics.print("playJustPressed: " .. tostring(button.play.justPressed), 5, 50)
-        else
-            love.graphics.print("level: " .. tostring(settings.level), 5, 35)
-            love.graphics.print("isBackDown: " .. tostring(button.back.isDown), 5, 50)
-            love.graphics.print("backJustPressed: " .. tostring(button.back.justPressed), 5, 65)
-            love.graphics.print("isAgainDown: " .. tostring(button.again.isDown), 5, 80)
-            love.graphics.print("againJustPressed: " .. tostring(button.again.justPressed), 5, 95)
-        end
-
+        love.graphics.print("level: " .. tostring(settings.level), 5, 35)
         love.graphics.setColor(255, 255, 255, 255)
     end
 end
@@ -417,9 +505,33 @@ function drawMenu(dt)
         love.graphics.draw(button.play.up, button.play.x * settings.scale, button.play.y * settings.scale, 0, settings.scale, settings.scale)
     end
 
+    if button.info.isDown then
+        love.graphics.draw(button.info.down, button.info.x * settings.scale, button.info.y * settings.scale, 0, settings.scale, settings.scale)
+    else
+        love.graphics.draw(button.info.up, button.info.x * settings.scale, button.info.y * settings.scale, 0, settings.scale, settings.scale)
+    end
+
+    if button.exit.isDown then
+        love.graphics.draw(button.exit.down, button.exit.x * settings.scale, button.exit.y * settings.scale, 0, settings.scale, settings.scale)
+    else
+        love.graphics.draw(button.exit.up, button.exit.x * settings.scale, button.exit.y * settings.scale, 0, settings.scale, settings.scale)
+    end
+
     love.graphics.setColor(68, 68, 68, 255)
     love.graphics.print("Level " .. settings.level, (global.width / 2 - (res.fnt.font:getWidth("Level " .. settings.level) / 2)) * settings.scale, (global.height * 3 / 4 + 15) * settings.scale, 0, settings.scale, settings.scale)
     love.graphics.setColor(255, 255, 255, 255)
+end
+
+-- -------------------------------------------------------------
+
+function drawCredits(dt)
+    love.graphics.draw(res.img.credits, 0, 0, 0, settings.scale, settings.scale)
+
+    if button.back.isDown then
+        love.graphics.draw(button.back.down, button.back.x * settings.scale, button.back.y * settings.scale, 0, settings.scale, settings.scale)
+    else
+        love.graphics.draw(button.back.up, button.back.x * settings.scale, button.back.y * settings.scale, 0, settings.scale, settings.scale)
+    end
 end
 
 -- -------------------------------------------------------------
@@ -513,6 +625,7 @@ end
 -- -------------------------------------------------------------
 
 function nextLevel()
+    love.filesystem.write("data.bin", table.show(settings, "settings"))
     res.sfx.yaay:setVolume(0.5)
     res.sfx.yaay:play()
 
@@ -657,7 +770,7 @@ function love.keyreleased(k)
     if not timers.toGame and not timers.toMenu then
         -- quit the game
         if k == "escape" then
-            if global.inGame then
+            if global.inGame or global.inCredits then
                 timers.inTransition = true
                 timers.toMenu = true
                 startTransition()
@@ -686,10 +799,24 @@ function love.mousepressed(x, y, b)
                 button.again.isDown = true
             end
         end
+    elseif global.inCredits then
+        if b == "l" then
+            if not timers.toMenu and boxHit(x, y, button.back.x * settings.scale, button.back.y * settings.scale, button.back.width * settings.scale, button.back.height * settings.scale) then
+                button.back.isDown = true
+            end
+        end
     else
         if b == "l" then
             if not timers.toGame and boxHit(x, y, button.play.x * settings.scale, button.play.y * settings.scale, button.play.width * settings.scale, button.play.height * settings.scale) then
                 button.play.isDown = true
+            end
+
+            if not timers.toCredits and boxHit(x, y, button.info.x * settings.scale, button.info.y * settings.scale, button.info.width * settings.scale, button.info.height * settings.scale) then
+                button.info.isDown = true
+            end
+
+            if not timers.exit and boxHit(x, y, button.exit.x * settings.scale, button.exit.y * settings.scale, button.exit.width * settings.scale, button.exit.height * settings.scale) then
+                button.exit.isDown = true
             end
         end
     end
@@ -709,13 +836,21 @@ function love.mousereleased(x, y, b)
                     spots.freeBefore = spots.free
                     spots.free = tokens[tokens.moving].pos
                     tokens[tokens.moving].pos = spots.freeBefore
+                    res.sfx.woosh:setVolume(0.5)
+                    res.sfx.woosh:play()
                     flux.to(tokens[tokens.moving], 0.7, { x = spots[spots.freeBefore].x, y = spots[spots.freeBefore].y }):ease(global.easing):oncomplete(calculateMoves):oncomplete(checkWin)
                 end
             end
         end
+    elseif global.inCredits then
+        if b == "l" then
+            if not timers.toMenu and button.back.isDown then button.back.isDown = false end
+        end
     else
         if b == "l" then
             if not timers.toGame and button.play.isDown then button.play.isDown = false end
+            if not timers.toCredits and button.info.isDown then button.info.isDown = false end
+            if not timers.exit and button.exit.isDown then button.exit.isDown = false end
         end
     end
 end
@@ -728,7 +863,7 @@ function love.mousemoved(x, y, dx, dy) end
 
 function love.quit()
     if settings.fullscreen then settings.scale = global.scaleBefore end
-    love.filesystem.write("settings.lua", table.show(settings, "settings"))
+    love.filesystem.write("data.bin", table.show(settings, "settings"))
 end
 
 -- =========================================================================================
