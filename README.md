@@ -13,11 +13,12 @@ Puzzle game made with Love2D
 
 1. Juan Carlos Aguilar
 2. Adrián Amorós
-3. David Bravo
-4. Nelson Casares
-5. Jose María García
-6. Esther de la Morena
-7. Jorge García
-8. Manolo Reyes
-9. Rosa Ruiz
-10. Pablo Sabín
+3. Aida Auñon
+4. David Bravo
+5. Nelson Casares
+6. Jose María García
+7. Esther de la Morena
+8. Jorge García
+9. Manolo Reyes
+10. Rosa Ruiz
+11. Pablo Sabín
